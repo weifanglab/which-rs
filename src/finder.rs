@@ -77,6 +77,9 @@ impl<TSys: Sys> Finder<TSys> {
         );
 
         let ret = match cwd {
+            _ if path.is_absolute() => {
+                WhichFindIterator::new_cwd(path, Path::new(""), self.sys, nonfatal_error_handler)
+            }
             Some(cwd) if path.has_separator() => {
                 WhichFindIterator::new_cwd(path, cwd.as_ref(), self.sys, nonfatal_error_handler)
             }

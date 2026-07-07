@@ -863,6 +863,19 @@ mod in_memory {
     }
 
     #[test]
+    fn absolute_path_works_without_cwd_or_path_list() {
+        let mut sys = InMemorySys::new();
+        sys.write_executable("/sub/dir/exec");
+        let config = which::WhichConfig::new_with_sys(sys)
+            .system_cwd(false)
+            .binary_name(OsString::from("/sub/dir/exec"));
+
+        let result = config.first_result().unwrap();
+
+        assert_eq!(result, PathBuf::from("/sub/dir/exec"));
+    }
+
+    #[test]
     fn symlink() {
         let mut sys = InMemorySys::new();
         sys.set_env_var("PATH", "/sub/dir1/");
