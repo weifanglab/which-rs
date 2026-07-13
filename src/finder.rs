@@ -78,7 +78,7 @@ impl<TSys: Sys> Finder<TSys> {
 
         let ret = match cwd {
             _ if path.is_absolute() => {
-                WhichFindIterator::new_cwd(path, Path::new(""), self.sys, nonfatal_error_handler)
+                WhichFindIterator::new_path(path, self.sys, nonfatal_error_handler)
             }
             Some(cwd) if path.has_separator() => {
                 WhichFindIterator::new_cwd(path, cwd.as_ref(), self.sys, nonfatal_error_handler)
@@ -126,12 +126,7 @@ struct WhichFindIterator<TSys: Sys, F: NonFatalErrorHandler> {
 }
 
 impl<TSys: Sys, F: NonFatalErrorHandler> WhichFindIterator<TSys, F> {
-    pub fn new_cwd(
-        binary_name: PathBuf,
-        cwd: &Path,
-        sys: TSys,
-        mut nonfatal_error_handler: F,
-    ) -> Self {
+    pub fn new_path(binary_name: PathBuf, sys: TSys, mut nonfatal_error_handler: F) -> Self {
         let path_extensions = if sys.is_windows() {
             sys.env_windows_path_ext()
         } else {
@@ -143,12 +138,16 @@ impl<TSys: Sys, F: NonFatalErrorHandler> WhichFindIterator<TSys, F> {
         Self {
             sys,
             paths: PathsIter {
-                paths: vec![binary_name.to_absolute(cwd)].into_iter(),
+                paths: vec![binary_name].into_iter(),
                 current_path_with_index: None,
                 path_extensions,
             },
             nonfatal_error_handler,
         }
+    }
+
+    pub fn new_cwd(binary_name: PathBuf, cwd: &Path, sys: TSys, nonfatal_error_handler: F) -> Self {
+        Self::new_path(binary_name.to_absolute(cwd), sys, nonfatal_error_handler)
     }
 
     pub fn new_paths(

@@ -322,6 +322,19 @@ mod real_sys {
 
     #[test]
     #[cfg(windows)]
+    fn test_which_global_absolute_without_path_list() {
+        let f = TestFixture::new();
+
+        let result = which::which_in_global(&f.bins[4], Option::<&OsStr>::None)
+            .unwrap()
+            .next()
+            .unwrap();
+
+        assert_eq!(result, f.bins[4]);
+    }
+
+    #[test]
+    #[cfg(windows)]
     fn test_which_absolute_path_case() {
         // Test that an absolute path with an uppercase extension
         // is accepted.
@@ -863,6 +876,7 @@ mod in_memory {
     }
 
     #[test]
+    #[cfg(not(windows))]
     fn absolute_path_works_without_cwd_or_path_list() {
         let mut sys = InMemorySys::new();
         sys.write_executable("/sub/dir/exec");
