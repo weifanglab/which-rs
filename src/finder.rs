@@ -376,18 +376,14 @@ impl<TSys: Sys, B: Borrow<Regex>, F: NonFatalErrorHandler> Iterator
                     }
                 }
             } else {
-                let path = self.paths.next();
-                if let Some(path) = path {
-                    match self.sys.read_dir(&path) {
-                        Ok(new_read_dir_iter) => {
-                            self.current_read_dir_iter = Some(new_read_dir_iter);
-                        }
-                        Err(e) => {
-                            self.nonfatal_error_handler.handle(NonFatalError::Io(e));
-                        }
+                let path = self.paths.next()?;
+                match self.sys.read_dir(&path) {
+                    Ok(new_read_dir_iter) => {
+                        self.current_read_dir_iter = Some(new_read_dir_iter);
                     }
-                } else {
-                    return None;
+                    Err(e) => {
+                        self.nonfatal_error_handler.handle(NonFatalError::Io(e));
+                    }
                 }
             }
         }
